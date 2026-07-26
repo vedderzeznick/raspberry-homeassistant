@@ -329,43 +329,53 @@ void pantalla_gato(void)
     if (!mqtt_lcd_display_enabled())
         return;
 
-    lcd_create_char(8, guitar0);
-    lcd_create_char(9, guitar1);
-    lcd_create_char(10, guitar2);
-    lcd_create_char(11, guitar3);
-    lcd_create_char(12, guitar4);
-    lcd_create_char(13, guitar5);
-    lcd_create_char(14, guitar6);
-    lcd_create_char(15, guitar7);
-    lcd_create_char(16, guitar8);
-    lcd_create_char(17, guitar9);
-    lcd_create_char(18, guitar10);
-    lcd_create_char(19, guitar11);
-    lcd_create_char(20, guitar12);
-    lcd_create_char(21, guitar13);
-    lcd_create_char(22, guitar14);
-    lcd_create_char(23, guitar15);
-     lcd_clear();
+    lcd_create_char(0, guitar0);
+    lcd_create_char(1, guitar1);
+    lcd_create_char(2, guitar2);
+    lcd_create_char(3, guitar3);
+    lcd_create_char(4, guitar4);
+    lcd_create_char(5, guitar5);
+    lcd_create_char(6, guitar6);
+    lcd_create_char(7, guitar7);
+    lcd_create_char(8, guitar8);
+    //lcd_create_char(9, guitar9);
+    //lcd_create_char(10, guitar10);
+    //lcd_create_char(11, guitar11);
+    //lcd_create_char(12, guitar12);
+    //lcd_create_char(13, guitar13);
+    //lcd_create_char(14, guitar14);
+    //lcd_create_char(15, guitar15);
+    lcd_clear();
 
-lcd_set_cursor(0,0);
-lcd_write_char(8);
-lcd_write_char(9);
-lcd_write_char(10);
-     lcd_write_char(11);
-    lcd_write_char(12);
-    lcd_write_char(13);
-    lcd_write_char(14);
-    lcd_write_char(15);
+    lcd_set_cursor(0,0);
+    lcd_write_char(0);
+    lcd_write_char(1);
+    lcd_write_char(2);
+    lcd_write_char(3);
+    lcd_write_char(4);
+    lcd_write_char(5);
+    lcd_write_char(6);
+    lcd_write_char(7);
+
+    lcd_create_char(0, guitar8);
+    lcd_create_char(1, guitar9);
+    lcd_create_char(2, guitar10);
+    lcd_create_char(3, guitar11);
+    lcd_create_char(4, guitar12);
+    lcd_create_char(5, guitar13);
+    lcd_create_char(6, guitar14);
+    lcd_create_char(7, guitar15);
 
     lcd_set_cursor(1,0);
-    lcd_write_char(16);
-    lcd_write_char(17);
-    lcd_write_char(18);
-    lcd_write_char(19);
-    lcd_write_char(20);
-    lcd_write_char(21);
-    lcd_write_char(22);
-    lcd_write_char(23);
+    
+    lcd_write_char(0);
+    lcd_write_char(1);
+    lcd_write_char(2);
+    lcd_write_char(3);
+    lcd_write_char(4);
+    lcd_write_char(5);
+    lcd_write_char(6);
+    lcd_write_char(7);
 
 //lcd_set_cursor(0,9);
 //lcd_print("LIL'S");
@@ -373,6 +383,6 @@ lcd_write_char(10);
 //lcd_set_cursor(1,9);
 //lcd_print("HOME");
 
-sleep(10);
+    sleep(10);
 }
 
