@@ -258,12 +258,13 @@ void pantalla_gato(void)
     lcd_write_char(1);
     lcd_write_char(2);
     lcd_write_char(3);
+
+    lcd_set_cursor(1,0);
     lcd_write_char(4);
     lcd_write_char(5);
     lcd_write_char(6);
     lcd_write_char(7);
 
-    lcd_set_cursor(1,0);
 
     lcd_set_cursor(0,9);
     lcd_print("LIL'S");
