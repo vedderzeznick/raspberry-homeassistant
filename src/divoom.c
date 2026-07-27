@@ -53,6 +53,84 @@ int divoom_init(const char *device_path)
     return 0;
 }
 
+int divoom_write(const uint8_t *data, int len)
+{
+    DBusMessage *msg;
+    DBusMessage *reply;
+    DBusMessageIter iter;
+    DBusMessageIter array;
+    DBusMessageIter dict;
+
+    DBusError err;
+
+    dbus_error_init(&err);
+
+    msg = dbus_message_new_method_call(
+            "org.bluez",
+            divoom.write_char,
+            "org.bluez.GattCharacteristic1",
+            "WriteValue");
+
+    if (!msg)
+    {
+        printf("Cannot create DBus message\n");
+        return -1;
+    }
+
+    dbus_message_iter_init_append(msg, &iter);
+
+    dbus_message_iter_open_container(&iter,
+                                     DBUS_TYPE_ARRAY,
+                                     "y",
+                                     &array);
+
+    for(int i=0;i<len;i++)
+    {
+        uint8_t b = data[i];
+
+        dbus_message_iter_append_basic(
+                &array,
+                DBUS_TYPE_BYTE,
+                &b);
+    }
+
+    dbus_message_iter_close_container(&iter,&array);
+
+    /* opciones = {} */
+
+    dbus_message_iter_open_container(
+            &iter,
+            DBUS_TYPE_ARRAY,
+            "{sv}",
+            &dict);
+
+    dbus_message_iter_close_container(
+            &iter,
+            &dict);
+
+    reply = dbus_connection_send_with_reply_and_block(
+            divoom.conn,
+            msg,
+            3000,
+            &err);
+
+    dbus_message_unref(msg);
+
+    if(dbus_error_is_set(&err))
+    {
+        printf("Write error: %s\n",err.message);
+        dbus_error_free(&err);
+        return -1;
+    }
+
+    if(reply)
+        dbus_message_unref(reply);
+
+    printf("Write OK\n");
+
+    return 0;
+}
+
 void divoom_close(void)
 {
 }

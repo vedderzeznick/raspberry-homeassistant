@@ -45,6 +45,10 @@ int main(void)
 
     divoom_init("B1:21:81:3F:84:7C");
 
+    uint8_t test[]={0x00};
+
+    divoom_write(test,1);
+
     ultima_animacion = time(NULL);
 
     animacion_dino();
