@@ -6,6 +6,7 @@
 #include "../include/dht22.h"
 #include "../include/animacion.h"
 #include "../include/mqtt.h"
+#include "../include/divoom.h"
 
 int main(void)
 {
@@ -32,41 +33,43 @@ int main(void)
         return 1;
     }
 
-dht22_init(6);
+    dht22_init(6);
 
-if (mqtt_init() != 0)
-{
-    printf("Error conectando con MQTT\n");
-    return 1;
-}
+    if (mqtt_init() != 0)
+    {
+        printf("Error conectando con MQTT\n");
+        return 1;
+    }
 
-mqtt_discovery();
+    mqtt_discovery();
 
-ultima_animacion = time(NULL);
+    divoom_init("B1:21:81:3F:84:7C");
+
+    ultima_animacion = time(NULL);
 
     animacion_dino();
 
-   while (1)
-   {
-    mqtt_loop();
-    ahora = time(NULL);
+    while (1)
+    {
+        mqtt_loop();
+        ahora = time(NULL);
 
     if (mqtt_lcd_display_enabled() &&
     (ahora - ultima_animacion) >= 30)
-{
-    if (siguiente_animacion == 0)
     {
-        animacion_dino();
-        siguiente_animacion = 1;
-    }
-    else
-    {
-        pantalla_gato();
-        siguiente_animacion = 0;
-    }
+        if (siguiente_animacion == 0)
+        {
+            animacion_dino();
+            siguiente_animacion = 1;
+        }
+        else
+        {
+            pantalla_gato();
+            siguiente_animacion = 0;
+        }
 
-    ultima_animacion = time(NULL);
-}
+        ultima_animacion = time(NULL);
+    }
 
     if (dht22_read(&temp, &hum) == 0)
     {

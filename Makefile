@@ -9,6 +9,7 @@ SRC=src/main.c \
     src/gpio.c \
     src/dht22.c \
     src/animacion.c \
+    src/divoom.c \
     src/mqtt.c
 
 TARGET = temperatura
