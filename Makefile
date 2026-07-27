@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS = -Wall -O2 -Iinclude
 
-LDFLAGS = -llgpio -lmosquitto
+LDFLAGS = -llgpio -lmosquitto -lbluetooth -ldbus-1
 
 SRC=src/main.c \
     src/lcd.c \
