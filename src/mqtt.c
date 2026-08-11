@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <mosquitto.h>
 
 #include "../include/mqtt.h"
@@ -33,7 +34,16 @@ static void on_message(struct mosquitto *mosq,
         printf("LCD OFF\n");
     }
 }
+if (strcmp(msg->topic, "home/livingroom/raspberry/shutdown") == 0)
+{
+    printf("Payload length: %d\n", msg->payloadlen);
 
+    if (strncmp((char *)msg->payload, "PRESS", msg->payloadlen) == 0)
+    {
+        printf("SHUTDOWN requested\n");
+        system("sudo /sbin/shutdown -h now");
+    }
+}
 }
 
 int mqtt_init(void)
@@ -60,7 +70,12 @@ int mqtt_init(void)
      "home/livingroom/lcd/display/set",
      0
     );
-
+    mosquitto_subscribe(
+    mosq,
+    NULL,
+    "home/livingroom/raspberry/shutdown",
+    0
+);
     return 0;
 }
 
@@ -147,6 +162,21 @@ void mqtt_discovery(void)
         "}"
         "}"
     );
+   mqtt_publish_string(
+    "homeassistant/button/raspberry_shutdown/config",
+    "{"
+    "\"name\":\"Apagar Raspberry\","
+    "\"unique_id\":\"raspberry_shutdown\","
+    "\"command_topic\":\"home/livingroom/raspberry/shutdown\","
+    "\"payload_press\":\"PRESS\","
+    "\"device\":{"
+        "\"identifiers\":[\"raspberry_pi_ambiental\"],"
+        "\"name\":\"Raspberry Pi Ambiental\","
+        "\"manufacturer\":\"Martin\","
+        "\"model\":\"Raspberry Pi 5\""
+    "}"
+    "}"
+);
 }
 
 void mqtt_cleanup(void)
