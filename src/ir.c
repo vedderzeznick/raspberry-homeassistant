@@ -35,8 +35,11 @@ static void ir_alert(
 
         uint64_t timestamp = alert->report.timestamp;
 
-        uint64_t duration =
+        uint64_t duration_ns =
             timestamp - last_tick;
+
+        uint32_t duration_us =
+            (uint32_t)(duration_ns / 1000);
 
         last_tick = timestamp;
 
@@ -44,7 +47,7 @@ static void ir_alert(
             continue;
 
         capture_code->pulses[capture_code->count].duration_us =
-            (uint32_t)duration;
+            duration_us;
 
         capture_code->pulses[capture_code->count].level =
             alert->report.level;
