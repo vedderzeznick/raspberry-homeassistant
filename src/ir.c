@@ -111,7 +111,7 @@ int ir_capture(ir_code_t *code)
 
     printf("IR: esperando señal durante 10 segundos...\n");
 
-    lguSleep(10.0)
+    lguSleep(10.0);
 
     capture_code = NULL;
 
