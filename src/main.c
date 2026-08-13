@@ -7,7 +7,7 @@
 #include "../include/animacion.h"
 #include "../include/mqtt.h"
 #include "../include/divoom.h"
-#include "../include/ir.h"
+// #include "../include/ir.h"
 
 int main(void)
 {
