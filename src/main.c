@@ -19,7 +19,7 @@ int main(void)
     time_t ultima_animacion;
     struct tm *tm_info;
     static int siguiente_animacion = 0;
-    if (ir_init(17) != 0)
+    if (ir_init(18) != 0)
     {
         printf("Error inicializando receptor IR\n");
         return 1;
