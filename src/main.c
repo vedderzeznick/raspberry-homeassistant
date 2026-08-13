@@ -7,6 +7,7 @@
 #include "../include/animacion.h"
 #include "../include/mqtt.h"
 #include "../include/divoom.h"
+#include "../include/ir.h"
 
 int main(void)
 {
@@ -18,7 +19,13 @@ int main(void)
     time_t ultima_animacion;
     struct tm *tm_info;
     static int siguiente_animacion = 0;
-    
+    if (ir_init(17) != 0)
+    {
+        printf("Error inicializando receptor IR\n");
+        return 1;
+    }
+
+    ir_close();
     if (lcd_init() != 0)
     {
         printf("Error inicializando LCD\n");
@@ -58,57 +65,69 @@ int main(void)
         mqtt_loop();
         ahora = time(NULL);
 
-    if (mqtt_lcd_display_enabled() &&
-    (ahora - ultima_animacion) >= 30)
-    {
-        if (siguiente_animacion == 0)
+        if (mqtt_lcd_display_enabled() &&
+        (ahora - ultima_animacion) >= 30)
         {
-            animacion_dino();
-            siguiente_animacion = 1;
+            if (siguiente_animacion == 0)
+            {
+                animacion_dino();
+                siguiente_animacion = 1;
+            }
+            else
+            {
+                pantalla_gato();
+                siguiente_animacion = 0;
+            }
+
+            ultima_animacion = time(NULL);
         }
-        else
+
+        if (dht22_read(&temp, &hum) == 0)
         {
-            pantalla_gato();
-            siguiente_animacion = 0;
+            mqtt_publish_float(
+                "home/livingroom/temperature",
+                temp,
+                1
+            );
+
+            mqtt_publish_float(
+                "home/livingroom/humidity",
+                hum,
+                0
+            );
+            if (mqtt_lcd_display_enabled() && dht22_read(&temp, &hum) == 0) 
+            {
+                tm_info = localtime(&ahora);
+
+                lcd_clear();
+
+                snprintf(
+                    linea,
+                    sizeof(linea),
+                    "%.1f%cC   %.0f%%RH",
+                    temp,
+                    0xDF,
+                    hum
+                );
+
+                lcd_set_cursor(0,0);
+                lcd_print(linea);
+
+                strftime(
+                    linea,
+                    sizeof(linea),
+                    "%H:%M",
+                    tm_info
+                );
+
+                lcd_set_cursor(1,0);
+                lcd_print(linea);
+            }
         }
 
-        ultima_animacion = time(NULL);
+        sleep(1);
     }
-
-    if (dht22_read(&temp, &hum) == 0)
-    {
-        mqtt_publish_float(
-        "home/livingroom/temperature",
-        temp,
-        1);
-
-mqtt_publish_float(
-    "home/livingroom/humidity",
-    hum,
-    0);
-    if (mqtt_lcd_display_enabled() && dht22_read(&temp, &hum) == 0) 
-    {
-        tm_info = localtime(&ahora);
-
-        lcd_clear();
-
-        snprintf(linea, sizeof(linea), "%.1f%cC   %.0f%%RH", temp, 0xDF, hum);
-
-        lcd_set_cursor(0,0);
-        lcd_print(linea);
-
-        strftime(linea, sizeof(linea),
-                 "%H:%M",
-                 tm_info);
-
-        lcd_set_cursor(1,0);
-        lcd_print(linea);
-    }
-    }
-
-    sleep(1);
-}
-mqtt_cleanup();
+    mqtt_cleanup();
     gpio_close();
 
     return 0;

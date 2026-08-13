@@ -2,11 +2,56 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <lgpio.h>
 
 static int gpio_handle = -1;
 static int gpio_ir = -1;
+
+static ir_code_t *capture_code = NULL;
+static uint64_t last_tick = 0;
+
+static void ir_alert(
+    int num_alerts,
+    lgGpioAlert_p alerts,
+    void *userdata)
+{
+    (void)userdata;
+
+    if (capture_code == NULL)
+        return;
+
+    for (int i = 0; i < num_alerts; i++)
+    {
+        lgGpioAlert_t *alert = &alerts[i];
+
+        if (alert->report.gpio != gpio_ir)
+            continue;
+
+        if (last_tick == 0)
+        {
+            last_tick = alert->timestamp;
+            continue;
+        }
+
+        uuint64_t timestamp = alert->report.timestamp;
+
+        uint64_t duration =
+            timestamp - last_tick;
+
+        last_tick = timestamp;
+
+        if (capture_code->count >= IR_MAX_PULSES)
+            continue;
+
+        capture_code->pulses[capture_code->count].duration_us =
+            (uint32_t)duration;
+
+        capture_code->pulses[capture_code->count].level =
+            alert->report.level;
+
+        capture_code->count++;
+    }
+}
 
 int ir_init(int gpio)
 {
@@ -20,11 +65,32 @@ int ir_init(int gpio)
         return -1;
     }
 
-    if (lgGpioClaimInput(gpio_handle, 0, gpio_ir) < 0)
+    if (lgGpioClaimAlert(
+            gpio_handle,
+            0,
+            LG_BOTH_EDGES,
+            gpio_ir,
+            -1) < 0)
     {
-        printf("IR: error reclamando GPIO %d\n", gpio_ir);
+        printf("IR: error configurando GPIO %d\n", gpio_ir);
+
         lgGpiochipClose(gpio_handle);
         gpio_handle = -1;
+
+        return -1;
+    }
+
+    if (lgGpioSetAlertsFunc(
+            gpio_handle,
+            gpio_ir,
+            ir_alert,
+            NULL) < 0)
+    {
+        printf("IR: error configurando callback\n");
+
+        lgGpiochipClose(gpio_handle);
+        gpio_handle = -1;
+
         return -1;
     }
 
@@ -36,23 +102,28 @@ int ir_init(int gpio)
 int ir_capture(ir_code_t *code)
 {
     if (gpio_handle < 0 || code == NULL)
-    {
         return -1;
-    }
 
     memset(code, 0, sizeof(ir_code_t));
 
-    printf("IR: esperando señal...\n");
+    capture_code = code;
+    last_tick = 0;
 
-    return 0;
+    printf("IR: esperando señal durante 10 segundos...\n");
+
+    lgSleep(10.0);
+
+    capture_code = NULL;
+
+    printf("IR: captura terminada\n");
+
+    return code->count;
 }
 
 void ir_print(const ir_code_t *code)
 {
     if (code == NULL)
-    {
         return;
-    }
 
     printf("\n--- IR CODE ---\n");
 
@@ -77,4 +148,5 @@ void ir_close(void)
     }
 
     gpio_ir = -1;
+    capture_code = NULL;
 }
