@@ -29,11 +29,11 @@ static void ir_alert(
 
         if (last_tick == 0)
         {
-            last_tick = alert->timestamp;
+            last_tick = alert->report.timestamp;
             continue;
         }
 
-        uuint64_t timestamp = alert->report.timestamp;
+        uint64_t timestamp = alert->report.timestamp;
 
         uint64_t duration =
             timestamp - last_tick;
@@ -111,7 +111,7 @@ int ir_capture(ir_code_t *code)
 
     printf("IR: esperando señal durante 10 segundos...\n");
 
-    lgSleep(10.0);
+    lguSleep(10.0)
 
     capture_code = NULL;
 
