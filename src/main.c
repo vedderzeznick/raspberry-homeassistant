@@ -19,13 +19,26 @@ int main(void)
     time_t ultima_animacion;
     struct tm *tm_info;
     static int siguiente_animacion = 0;
+    ir_code_t code;
+
+    printf("Inicializando receptor IR...\n");
+
     if (ir_init(18) != 0)
     {
         printf("Error inicializando receptor IR\n");
         return 1;
     }
 
+    printf("Receptor IR listo en GPIO18\n");
+
+    int result = ir_capture(&code);
+
+    printf("Resultado captura: %d\n", result);
+
+    ir_print(&code);
+
     ir_close();
+    
     if (lcd_init() != 0)
     {
         printf("Error inicializando LCD\n");
